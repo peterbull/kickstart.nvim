@@ -33,7 +33,7 @@ What is Kickstart?
     or immediately breaking it into modular pieces. It's up to you!
 
     If you don't know anything about Lua, I recommend taking some time to read through
-    a guide. One possible example which will only take 10-15 minutes:
+    a guide. One possible example which will only take 11-15 minutes:
       - https://learnxinyminutes.com/docs/lua/
 
     After understanding a bit more about Lua, you can use `:help lua-guide` as a
@@ -89,6 +89,14 @@ P.S. You can delete this when you're done too. It's your config now! :)
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+
+--- https://github.com/fredrikaverpil/dotfiles/blob/82b161d397d27772e2eb34422058df5fd44b06a7/nvim-fredrik/lua/fredrik/init.lua#L7
+---@diagnostic disable-next-line: undefined-global
+if init_debug then
+  local osvpath = vim.fn.stdpath 'data' .. '/lazy/one-small-step-for-vimkind'
+  vim.opt.rtp:prepend(osvpath)
+  require('osv').launch { port = 8086, blocking = true }
+end
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
@@ -1449,9 +1457,6 @@ require('lazy').setup({
       --     args = {},
       --   },
       -- }
-      dap.adapters.nlua = function(callback, config)
-        callback { type = 'server', host = config.host or '127.0.0.1', port = config.port or 8086 }
-      end
 
       dap.configurations.lua = {
         {
@@ -1460,14 +1465,16 @@ require('lazy').setup({
           name = 'Attach to running Neovim instance',
         },
       }
-
-      vim.keymap.set('n', '<leader>dl', function()
+      dap.adapters.nlua = function(callback, config)
+        callback { type = 'server', host = config.host or '127.0.0.1', port = config.port or 8086 }
+      end
+      vim.keymap.set('n', '<leader>dN', function()
         require('osv').launch { port = 8086 }
-      end, { noremap = true, desc = 'require("osv").launch()' })
+      end, { noremap = true, desc = 'Launch [N]vim Debug Server' })
       vim.keymap.set('n', '<leader>dw', function()
         local widgets = require 'dap.ui.widgets'
         widgets.hover()
-      end, { noremap = true, desc = 'require("dap.ui.widgets").hover()' })
+      end, { noremap = true, desc = 'Hover [W]idget' })
 
       local js_filetypes = { 'typescript', 'javascript', 'typescriptreact', 'javascriptreact' }
 
