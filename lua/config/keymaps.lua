@@ -64,3 +64,23 @@ local function my_custom_function()
 end
 
 vim.keymap.set('n', '<leader>cf', my_custom_function, { desc = 'Run [C]ustom [F]unction' })
+
+vim.keymap.set('n', '<leader>cd', function()
+  local buf_dir = vim.fn.expand '%:p:h'
+  vim.fn.setreg('+', buf_dir)
+  print('Buffer directory copied to clipboard: ' .. buf_dir)
+end, { desc = '[C]opy buffer [D]irectory to clipboard' })
+
+local cmdheight_state = 1
+
+vim.keymap.set('n', '<leader>tt', function()
+  if cmdheight_state == 1 then
+    vim.o.cmdheight = 15
+    cmdheight_state = 15
+    vim.notify('Command height: 15', vim.log.levels.INFO)
+  else
+    vim.o.cmdheight = 1
+    cmdheight_state = 1
+    vim.notify('Command height: 1', vim.log.levels.INFO)
+  end
+end, { desc = '[T]oggle [T]erminal height (cmdheight)' })

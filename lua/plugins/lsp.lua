@@ -1,6 +1,7 @@
 return {
   -- Main LSP Configuration
   'neovim/nvim-lspconfig',
+
   dependencies = {
     -- Automatically install LSPs and related tools to stdpath for Neovim
     -- Mason must be loaded before its dependents so we need to set it up here.
@@ -103,24 +104,74 @@ return {
             require('telescope.builtin').man_pages()
           end
         end, '[G]oto [M]anual Page')
+        -- map('grs', function()
+        --   -- go to source def in ts tools
+        --   local clients = vim.lsp.get_clients { bufnr = event.buf }
+        --   local has_tsserver = false
+        --
+        --   for _, client in ipairs(clients) do
+        --     if client.name == 'typescript-tools' or client.name == 'tsserver' or client.name == 'vtsls' then
+        --       has_tsserver = true
+        --       break
+        --     end
+        --   end
+        --
+        --   if has_tsserver then
+        --     vim.cmd 'TSToolsGoToSourceDefinition'
+        --   else
+        --     require('telescope.builtin').lsp_definitions()
+        --   end
+        -- end, '[G]oto [S]ource Definition')
+
         map('grs', function()
-          -- go to source def in ts tools
-          local clients = vim.lsp.get_clients { bufnr = event.buf }
-          local has_tsserver = false
+          local clients = vim.lsp.get_clients { bufnr = vim.api.nvim_get_current_buf() }
+          local vtsls_client = nil
 
           for _, client in ipairs(clients) do
-            if client.name == 'typescript-tools' or client.name == 'tsserver' then
-              has_tsserver = true
+            if client.name == 'vtsls' then
+              vtsls_client = client
               break
             end
           end
 
-          if has_tsserver then
-            vim.cmd 'TSToolsGoToSourceDefinition'
+          if vtsls_client then
+            -- Replicate what nvim-vtsls does
+            local winnr = vim.api.nvim_get_current_win()
+            local params = vim.lsp.util.make_position_params(winnr, vtsls_client.offset_encoding)
+
+            vim.lsp.buf_request(0, 'workspace/executeCommand', {
+              command = 'typescript.goToSourceDefinition',
+              arguments = { params.textDocument.uri, params.position },
+            }, function(err, result, ctx, config)
+              if err then
+                vim.notify('[vtsls]: ' .. tostring(err), vim.log.levels.ERROR)
+                return
+              end
+
+              -- Handle the response like nvim-vtsls does
+              local locations = result
+              if not locations or vim.tbl_isempty(locations) then
+                vim.notify('No source definition found', vim.log.levels.WARN)
+                return
+              elseif #locations == 1 then
+                -- Jump to single location
+                vim.lsp.util.show_document(locations[1], vtsls_client.offset_encoding, { reuse_win = false, focus = true })
+              else
+                -- Multiple locations - show in quickfix
+                local items = vim.lsp.util.locations_to_items(locations, vtsls_client.offset_encoding)
+                vim.fn.setqflist({}, ' ', {
+                  title = 'TS Source Definitions',
+                  items = items,
+                  context = ctx,
+                })
+                vim.api.nvim_command 'botright copen'
+              end
+            end)
           else
             require('telescope.builtin').lsp_definitions()
           end
         end, '[G]oto [S]ource Definition')
+
         --
         -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
         ---@param client vim.lsp.Client
@@ -224,7 +275,7 @@ return {
       clangd = {},
       -- gopls = {},
       pyright = {},
-      rust_analyzer = false,
+      -- rust_analyzer = false,
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
       --
       -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -248,22 +299,63 @@ return {
       emmet_language_server = {
         filetypes = { 'html', 'css' },
       },
-
-      lua_ls = {
-        -- cmd = { ... },
-        -- filetypes = { ... },
-        -- capabilities = {},
+      gopls = {
         settings = {
-          Lua = {
-            completion = {
-              callSnippet = 'Replace',
+          gopls = {
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              compositeLiteralTypes = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
             },
-            -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-            -- diagnostics = { disable = { 'missing-fields' } },
           },
         },
       },
 
+      lua_ls = {
+        before_init = function(_, config)
+          if not config.settings then
+            config.settings = {}
+          end
+          if not config.settings.Lua then
+            config.settings.Lua = {}
+          end
+          if not config.settings.Lua.diagnostics then
+            config.settings.Lua.diagnostics = {}
+          end
+          config.settings.Lua.diagnostics.globals = config.settings.Lua.diagnostics.globals or {}
+          table.insert(config.settings.Lua.diagnostics.globals, 'vim')
+        end,
+        settings = {
+          Lua = {
+            runtime = {
+              version = 'LuaJIT',
+            },
+            diagnostics = {
+              globals = { 'vim' },
+            },
+            workspace = {
+              checkThirdParty = false,
+            },
+            completion = {
+              callSnippet = 'Replace',
+            },
+            telemetry = {
+              enable = false,
+            },
+            codeLens = {
+              enable = true,
+            },
+            hint = {
+              enable = true,
+              semicolon = 'Disable',
+            },
+          },
+        },
+      },
       terraformls = {
         filetypes = { 'terraform', 'tf', 'terraform-vars' },
         settings = {
