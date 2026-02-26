@@ -58,6 +58,9 @@ vim.keymap.set('n', '<C-S-k>', '<C-w>K', { desc = 'Move window to the upper' })
 vim.keymap.set('n', '<leader>bd', ':bd<CR>', { desc = '[D]elete Current Buffer' })
 vim.keymap.set('n', '<leader>bo', ':%bd|edit#|bd#<CR>', { desc = '[D]elete All Other Buffers' })
 
+vim.keymap.set('n', ']q', '<cmd>cnext<CR>', { desc = 'Next quickfix' })
+vim.keymap.set('n', '[q', '<cmd>cprev<CR>', { desc = 'Prev quickfix' })
+
 -- Debug function
 local function my_custom_function()
   print 'debug function executed!'
