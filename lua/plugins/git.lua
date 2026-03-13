@@ -1,27 +1,27 @@
 return {
-  {
-    'tpope/vim-fugitive',
-    cmd = { 'Git', 'G', 'Gdiffsplit', 'Gread', 'Gwrite', 'Ggrep', 'GMove', 'GDelete', 'GBrowse' },
-    keys = {
-      -- Git status (like lazygit's main view)
-      { '<leader>gs', '<cmd>Git<CR>', desc = 'Git Status' },
-
-      -- Git log
-      { '<leader>gl', '<cmd>Git log --oneline<CR>', desc = 'Git Log' },
-
-      -- Git add current file
-      { '<leader>ga', '<cmd>Gwrite<CR>', desc = 'Git Add Current File' },
-
-      -- Git commit
-      { '<leader>gc', '<cmd>Git commit<CR>', desc = 'Git Commit' },
-
-      -- Git push
-      { '<leader>gp', '<cmd>Git push<CR>', desc = 'Git Push' },
-
-      -- Git pull
-      { '<leader>gP', '<cmd>Git pull<CR>', desc = 'Git Pull' },
-    },
-  },
+  -- {
+  --   'tpope/vim-fugitive',
+  --   cmd = { 'Git', 'G', 'Gdiffsplit', 'Gread', 'Gwrite', 'Ggrep', 'GMove', 'GDelete', 'GBrowse' },
+  --   keys = {
+  --     -- Git status (like lazygit's main view)
+  --     { '<leader>gs', '<cmd>Git<CR>', desc = 'Git Status' },
+  --
+  --     -- Git log
+  --     { '<leader>gl', '<cmd>Git log --oneline<CR>', desc = 'Git Log' },
+  --
+  --     -- Git add current file
+  --     { '<leader>ga', '<cmd>Gwrite<CR>', desc = 'Git Add Current File' },
+  --
+  --     -- Git commit
+  --     { '<leader>gc', '<cmd>Git commit<CR>', desc = 'Git Commit' },
+  --
+  --     -- Git push
+  --     { '<leader>gp', '<cmd>Git push<CR>', desc = 'Git Push' },
+  --
+  --     -- Git pull
+  --     { '<leader>gP', '<cmd>Git pull<CR>', desc = 'Git Pull' },
+  --   },
+  -- },
   {
     'sindrets/diffview.nvim',
     dependencies = { 'nvim-lua/plenary.nvim' },

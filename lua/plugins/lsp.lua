@@ -1,5 +1,4 @@
 return {
-  -- Main LSP Configuration
   'neovim/nvim-lspconfig',
 
   dependencies = {
@@ -353,6 +352,14 @@ return {
               enable = true,
               semicolon = 'Disable',
             },
+          },
+        },
+      },
+      zls = {
+        cmd = { vim.fn.expand '~/.zvm/bin/zls' },
+        settings = {
+          zls = {
+            enable_build_on_save = true,
           },
         },
       },
